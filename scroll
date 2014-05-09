@@ -20,26 +20,16 @@ use List::Util qw(min max);
 sub on_start {
 	my ($self) = @_;
 
-	$self->{scroll_increment} = $self->x_resource('scroll.increment') || 5;
-	$self->{scroll_keeplines} = $self->x_resource('scroll.keepLines') || 1;
+	$self->{increment} = $self->x_resource('scroll.increment') || 5;
+	$self->{keeplines} = $self->x_resource('scroll.keepLines') || 1;
 
 	()
-}
-
-sub up {
-	my ($self,$increment) = @_;
-	return max($self->view_start-$increment, $self->top_row);
-}
-
-sub down {
-	my ($self,$increment) = @_;
-	return min($self->view_start+$increment, 0);
 }
 
 sub on_user_command {
 	my ($self, $cmd) = @_;
 	
-	$cmd =~ s/^scroll:// || return;
+	$cmd =~ s/^scroll:// || return ();
 
 	my $new_line;
 
@@ -50,18 +40,22 @@ sub on_user_command {
 		$new_line = 0;
 	}
 	else {
-		$cmd =~ /(\w*)-(\w*)/ || return;
+		$cmd =~ /(\w*)-(\w*)/ || return 1;
+
 		my $increment;
 
-		if    ($2 eq "fixed")    {$increment = $self->{scroll_increment};}
-		elsif ($2 eq "page")     {$increment = $self->nrow - $self->{scroll_keeplines};}
+		if    ($2 eq "fixed")    {$increment = $self->{increment};}
+		elsif ($2 eq "page")     {$increment = $self->nrow - $self->{keeplines};}
 		elsif ($2 eq "halfpage") {$increment = $self->nrow / 2;}
-		else {return;}
+		else {return 1;}
 
-		if    ($1 eq "up")   {$new_line = up($self, $increment);}
-		elsif ($1 eq "down") {$new_line = down($self, $increment);}
+		if    ($1 eq "up")   {$new_line = max($self->view_start-$increment, $self->top_row);}
+		elsif ($1 eq "down") {$new_line = min($self->view_start+$increment, 0);}
+		else {return 1;}
 	}
 
 	$self->view_start($new_line);
 	$self->want_refresh;
+	
+	1
 }
