@@ -46,7 +46,7 @@ sub on_user_command {
 
 		if    ($2 eq "fixed")    {$increment = $self->{increment};}
 		elsif ($2 eq "page")     {$increment = $self->nrow - $self->{keeplines};}
-		elsif ($2 eq "halfpage") {$increment = $self->nrow / 2;}
+		elsif ($2 eq "halfpage") {$increment = int($self->nrow / 2);}
 		else {return 1;}
 
 		if    ($1 eq "up")   {$new_line = max($self->view_start-$increment, $self->top_row);}
