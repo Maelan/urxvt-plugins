@@ -32,6 +32,9 @@ sub on_key_press {
 	my ($self,$event,$keysym,$octets) = @_;
 	my $state = $event->{state};
 	
+	# Disabled in the alternate screen.
+    $self->current_screen and return ();
+	
 	# state bitmask: Shift = 1, Ctrl = 4, Alt = 8
 	# keysym: L = 76, l = 108
 	
